@@ -85,6 +85,9 @@ waitForElement('#grok-gone-checklist', async (selectedElement) => {
     input.addEventListener('click', (event) => {
       event.stopPropagation();
     });
+    label.addEventListener('click', (event) => {
+      event.stopPropagation();
+    });
     li.addEventListener('click', () => {
       input.checked = !input.checked;
       const e = new Event('change');

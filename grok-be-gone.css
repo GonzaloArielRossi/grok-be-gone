@@ -101,6 +101,7 @@ ul.checklist label {
   font-size: 16px;
   color: #ddd;
   transition: color 0.3s ease;
+  cursor: pointer;
 }
 
 ul.checklist input[type='checkbox']:checked + label {
