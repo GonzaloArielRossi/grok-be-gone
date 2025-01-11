@@ -1,0 +1,20 @@
+{
+  "name": "Grok Be Gone!",
+  "version": "1.0",
+  "manifest_version": 3,
+  "description": "Remove clutter from X's sidebar",
+  "permissions": ["scripting", "activeTab", "storage"],
+  "host_permissions": ["https://x.com/*"],
+  "action": {
+    "default_popup": "grok-be-gone-popup.html",
+    "default_icon": "grok-be-gone.png"
+  },
+  "content_scripts": [
+    {
+      "js": ["scripts/content.js"],
+      "matches": ["https://x.com/*"],
+      "run_at": "document_end",
+      "type": "module"
+    }
+  ]
+}

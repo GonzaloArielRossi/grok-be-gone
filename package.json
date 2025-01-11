@@ -1,0 +1,35 @@
+{
+  "name": "grok-be-gone",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Remove clutter from X's sidebar",
+  "scripts": {
+    "prettier": "npx prettier **/*.{md,html,json} -w",
+    "lint": "eslint **/*.js",
+    "lint:fix": "npm run lint -- --fix",
+    "prepare": "husky install"
+  },
+  "keywords": [],
+  "author": "Gonzalo Ariel Rossi",
+  "license": "Apache 2.0",
+  "devDependencies": {
+    "@eslint/js": "9.12.0",
+    "chrome-types": "0.1.312",
+    "eslint": "9.12.0",
+    "eslint-config-prettier": "9.1.0",
+    "eslint-plugin-jest": "28.8.3",
+    "eslint-plugin-prettier": "5.2.1",
+    "globals": "15.11.0",
+    "husky": "9.1.6",
+    "lint-staged": "15.2.10",
+    "prettier": "3.3.3"
+  },
+  "lint-staged": {
+    "**/*.js": [
+      "npx eslint --fix"
+    ],
+    "**/*.{md,html,json}": [
+      "npx prettier --write"
+    ]
+  }
+}
