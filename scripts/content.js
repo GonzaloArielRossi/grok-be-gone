@@ -48,50 +48,75 @@ const SIDEBAR_ITEMS = [
 
 function waitForElement(selector, callback) {
   const selectedElement = document.querySelector(selector);
-
   if (selectedElement) {
     callback(selectedElement);
-  } else {
-    setTimeout(() => waitForElement(selector, callback), 100);
+    return;
   }
+  setTimeout(() => waitForElement(selector, callback), 100);
+}
+
+async function toggleLinksVisibility(links) {
+  const currentLinksStates = await chrome.storage.sync.get(
+    SIDEBAR_ITEMS.map((item) => item.id)
+  );
+  links.forEach((link) => {
+    const href = link.getAttribute('href');
+    SIDEBAR_ITEMS.forEach((sidebarItem) => {
+      if (sidebarItem.regex.test(href)) {
+        link.style.display = currentLinksStates[sidebarItem.id]
+          ? 'none'
+          : 'flex';
+      }
+    });
+  });
 }
 
 waitForElement(
   '[role="banner"] [role="navigation"]',
   async (selectedElement) => {
-    const currentLinksStates = await chrome.storage.sync.get(
-      SIDEBAR_ITEMS.map((item) => item.id)
-    );
-
-    console.log({ currentLinksStates });
-
     const links = selectedElement.querySelectorAll('a');
-    links.forEach((link) => {
-      const href = link.getAttribute('href');
-      SIDEBAR_ITEMS.forEach((sidebarItem) => {
-        if (sidebarItem.regex.test(href)) {
-          link.style.display = currentLinksStates[sidebarItem.id]
-            ? 'none'
-            : 'flex';
-        }
+    await toggleLinksVisibility(links);
+    const showMoreButton = selectedElement.querySelector(
+      'button[aria-expanded="false"]'
+    );
+    showMoreButton.addEventListener('click', (event) => {
+      console.log('showMoreButtonClicked');
+      const expanded = event.target.getAttribute('aria-expanded') === 'true';
+      const showMoreEvent = new CustomEvent('showMoreButtonClicked', {
+        detail: { expanded }
       });
+      window.dispatchEvent(showMoreEvent);
     });
   }
 );
 
-chrome.runtime.onMessage.addListener((msg, _sender, _sendResponse) => {
+chrome.runtime.onMessage.addListener((msg) => {
   if (msg.type === 'optionChange') {
-    waitForElement('[role="banner"] [role="navigation"]', (selectedElement) => {
-      const links = selectedElement.querySelectorAll('a');
-      const sidebarItemChecked = SIDEBAR_ITEMS.find(
-        (sidebarItem) => sidebarItem.id === msg.id
-      );
-      links.forEach((link) => {
-        const href = link.getAttribute('href');
-        if (sidebarItemChecked.regex.test(href)) {
-          link.style.display = msg.checked ? 'none' : 'flex';
-        }
-      });
-    });
+    waitForElement(
+      '[role="banner"] [role="navigation"]',
+      async (selectedElement) => {
+        const links = selectedElement.querySelectorAll('a');
+        await toggleLinksVisibility(links);
+      }
+    );
+    waitForElement(
+      '[role="menu"] [data-testid="Dropdown"]',
+      async (selectedElement) => {
+        const links = selectedElement.querySelectorAll('a');
+        await toggleLinksVisibility(links);
+      }
+    );
+  }
+});
+
+window.addEventListener('showMoreButtonClicked', (event) => {
+  if (!event.detail.expanded) {
+    waitForElement(
+      '[role="menu"] [data-testid="Dropdown"]',
+      async (selectedElement) => {
+        const links = selectedElement.querySelectorAll('a');
+        await toggleLinksVisibility(links);
+      }
+    );
   }
 });
