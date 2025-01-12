@@ -12,7 +12,7 @@ const SIDEBAR_ITEMS = [
   {
     id: 'premium',
     label: 'Premium',
-    regex: /\/i\/premium_sign_up/
+    regex: /\/i\/premium*/
   },
   {
     id: 'verified-orgs',
