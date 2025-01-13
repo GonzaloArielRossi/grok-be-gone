@@ -38,7 +38,6 @@ const SIDEBAR_ITEMS = [
 ];
 
 function waitForElement(selector, callback) {
-  console.log('Waiting for element', selector);
   const selectedElement = document.querySelector(selector);
 
   if (selectedElement) {
