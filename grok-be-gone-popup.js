@@ -1,52 +1,44 @@
 const SIDEBAR_ITEMS = [
   {
     id: 'grok',
-    label: 'Grok',
-    regex: /\/i\/grok/
+    label: 'Grok'
   },
   {
     id: 'communities',
-    label: 'Communities',
-    regex: /\/*\/communities/
+    label: 'Communities'
   },
   {
     id: 'premium',
-    label: 'Premium',
-    regex: /\/i\/premium_sign_up/
+    label: 'Premium'
   },
   {
     id: 'verified-orgs',
-    label: 'Verified Orgs',
-    regex: /\/i\/verified-orgs-signup/
+    label: 'Verified Orgs'
   },
   {
     id: 'lists',
-    label: 'Lists',
-    regex: /\/*\/lists/
+    label: 'Lists'
   },
   {
     id: 'monetization',
-    label: 'Monetization',
-    regex: /\/i\/monetization/
+    label: 'Monetization'
   },
   {
     id: 'ads',
-    label: 'Ads',
-    regex: /https:\/\/ads.x.com/
+    label: 'Ads'
   },
   {
     id: 'jobs',
-    label: 'Jobs',
-    regex: /\/*\/jobs/
+    label: 'Jobs'
   },
   {
     id: 'spaces',
-    label: 'Spaces',
-    regex: /\/i\/spaces\/start/
+    label: 'Spaces'
   }
 ];
 
 function waitForElement(selector, callback) {
+  console.log('Waiting for element', selector);
   const selectedElement = document.querySelector(selector);
 
   if (selectedElement) {

@@ -1,122 +1,103 @@
-const SIDEBAR_ITEMS = [
-  {
+const LOCATIONS = {
+  SIDEBAR: 'sidebar',
+  DROPDOWN: 'dropdown'
+};
+const SIDEBAR_ITEMS = {
+  grok: {
     id: 'grok',
     label: 'Grok',
-    regex: /\/i\/grok/
+    hrefSelector: 'grok',
+    location: LOCATIONS.SIDEBAR
   },
-  {
+  communities: {
     id: 'communities',
     label: 'Communities',
-    regex: /\/*\/communities/
+    hrefSelector: 'communities',
+    location: LOCATIONS.SIDEBAR
   },
-  {
+  premium: {
     id: 'premium',
     label: 'Premium',
-    regex: /\/i\/premium*/
+    hrefSelector: 'premium',
+    location: LOCATIONS.SIDEBAR
   },
-  {
+  'verified-orgs': {
     id: 'verified-orgs',
     label: 'Verified Orgs',
-    regex: /\/i\/verified-orgs-signup/
+    hrefSelector: 'verified',
+    location: LOCATIONS.SIDEBAR
   },
-  {
+  lists: {
     id: 'lists',
     label: 'Lists',
-    regex: /\/*\/lists/
+    hrefSelector: 'lists',
+    location: LOCATIONS.DROPDOWN
   },
-  {
+  monetization: {
     id: 'monetization',
     label: 'Monetization',
-    regex: /\/i\/monetization/
+    hrefSelector: 'monetization',
+    location: LOCATIONS.DROPDOWN
   },
-  {
+  ads: {
     id: 'ads',
     label: 'Ads',
-    regex: /https:\/\/ads.x.com/
+    hrefSelector: 'ads',
+    location: LOCATIONS.DROPDOWN
   },
-  {
+  jobs: {
     id: 'jobs',
     label: 'Jobs',
-    regex: /\/*\/jobs/
+    hrefSelector: 'jobs',
+    location: LOCATIONS.DROPDOWN
   },
-  {
+  spaces: {
     id: 'spaces',
     label: 'Spaces',
-    regex: /\/i\/spaces\/start/
+    hrefSelector: 'spaces',
+    location: LOCATIONS.DROPDOWN
   }
-];
+};
 
-function waitForElement(selector, callback) {
-  const selectedElement = document.querySelector(selector);
-  if (selectedElement) {
-    callback(selectedElement);
-    return;
-  }
-  setTimeout(() => waitForElement(selector, callback), 100);
-}
+function createAndAppendStyleElement(targetItems) {
+  const style = document.createElement('style');
 
-async function toggleLinksVisibility(links) {
-  const currentLinksStates = await chrome.storage.sync.get(
-    SIDEBAR_ITEMS.map((item) => item.id)
-  );
-  links.forEach((link) => {
-    const href = link.getAttribute('href');
-    SIDEBAR_ITEMS.forEach((sidebarItem) => {
-      if (sidebarItem.regex.test(href)) {
-        link.style.display = currentLinksStates[sidebarItem.id]
-          ? 'none'
-          : 'flex';
+  targetItems.forEach((targetItem) => {
+    if (targetItem.location === LOCATIONS.SIDEBAR) {
+      style.innerHTML += `
+      [role="banner"] a[href*="${targetItem.hrefSelector}"] {
+        display: ${targetItem.display} !important;
       }
-    });
+      `;
+    }
+    if (targetItem.location === LOCATIONS.DROPDOWN) {
+      style.innerHTML += `
+      [role="menu"] a[href*="${targetItem.hrefSelector}"] {
+        display: ${targetItem.display} !important;
+      }
+      `;
+    }
   });
+
+  document.head.append(style);
 }
-
-waitForElement(
-  '[role="banner"] [role="navigation"]',
-  async (selectedElement) => {
-    const links = selectedElement.querySelectorAll('a');
-    await toggleLinksVisibility(links);
-    const showMoreButton = selectedElement.querySelector(
-      'button[aria-expanded="false"]'
-    );
-    showMoreButton.addEventListener('click', (event) => {
-      console.log('showMoreButtonClicked');
-      const expanded = event.target.getAttribute('aria-expanded') === 'true';
-      const showMoreEvent = new CustomEvent('showMoreButtonClicked', {
-        detail: { expanded }
-      });
-      window.dispatchEvent(showMoreEvent);
-    });
-  }
-);
-
 chrome.runtime.onMessage.addListener((msg) => {
   if (msg.type === 'optionChange') {
-    waitForElement(
-      '[role="banner"] [role="navigation"]',
-      async (selectedElement) => {
-        const links = selectedElement.querySelectorAll('a');
-        await toggleLinksVisibility(links);
-      }
-    );
-    waitForElement(
-      '[role="menu"] [data-testid="Dropdown"]',
-      async (selectedElement) => {
-        const links = selectedElement.querySelectorAll('a');
-        await toggleLinksVisibility(links);
-      }
-    );
+    const targetItem = SIDEBAR_ITEMS[msg.id];
+    targetItem.display = msg.checked ? 'none' : 'flex';
+    createAndAppendStyleElement([targetItem]);
   }
 });
 
-window.addEventListener('showMoreButtonClicked', (event) => {
-  if (!event.detail.expanded) {
-    waitForElement(
-      '[role="menu"] [data-testid="Dropdown"]',
-      async (selectedElement) => {
-        const links = selectedElement.querySelectorAll('a');
-        await toggleLinksVisibility(links);
-      }
-    );
+chrome.storage.sync.get(null, (data) => {
+  const options = data;
+  if (options) {
+    const targetItems = [];
+    Object.keys(options).forEach((key) => {
+      const targetItem = SIDEBAR_ITEMS[key];
+      targetItem.display = options[key] ? 'none' : 'flex';
+      targetItems.push(targetItem);
+    });
+    createAndAppendStyleElement(targetItems);
   }
 });
