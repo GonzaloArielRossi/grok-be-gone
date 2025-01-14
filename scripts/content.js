@@ -7,54 +7,63 @@ const SIDEBAR_ITEMS = {
     id: 'grok',
     label: 'Grok',
     hrefSelector: 'grok',
+    display: 'none',
     location: LOCATIONS.SIDEBAR
   },
   communities: {
     id: 'communities',
     label: 'Communities',
     hrefSelector: 'communities',
+    display: 'none',
     location: LOCATIONS.SIDEBAR
   },
   premium: {
     id: 'premium',
     label: 'Premium',
     hrefSelector: 'premium',
+    display: 'none',
     location: LOCATIONS.SIDEBAR
   },
   'verified-orgs': {
     id: 'verified-orgs',
     label: 'Verified Orgs',
     hrefSelector: 'verified',
+    display: 'none',
     location: LOCATIONS.SIDEBAR
   },
   lists: {
     id: 'lists',
     label: 'Lists',
     hrefSelector: 'lists',
+    display: 'none',
     location: LOCATIONS.DROPDOWN
   },
   monetization: {
     id: 'monetization',
     label: 'Monetization',
     hrefSelector: 'monetization',
+    display: 'none',
     location: LOCATIONS.DROPDOWN
   },
   ads: {
     id: 'ads',
     label: 'Ads',
     hrefSelector: 'ads',
+    display: 'none',
     location: LOCATIONS.DROPDOWN
   },
   jobs: {
     id: 'jobs',
     label: 'Jobs',
     hrefSelector: 'jobs',
+    display: 'none',
     location: LOCATIONS.DROPDOWN
   },
   spaces: {
     id: 'spaces',
     label: 'Spaces',
     hrefSelector: 'spaces',
+    display: 'none',
     location: LOCATIONS.DROPDOWN
   }
 };
@@ -81,6 +90,7 @@ function createAndAppendStyleElement(targetItems) {
 
   document.head.append(style);
 }
+
 chrome.runtime.onMessage.addListener((msg) => {
   if (msg.type === 'optionChange') {
     const targetItem = SIDEBAR_ITEMS[msg.id];
