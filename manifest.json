@@ -3,7 +3,7 @@
   "version": "1.0",
   "manifest_version": 3,
   "description": "Remove clutter from X's sidebar",
-  "permissions": ["scripting", "activeTab", "storage"],
+  "permissions": ["activeTab", "storage"],
   "host_permissions": ["https://x.com/*"],
   "action": {
     "default_popup": "grok-be-gone-popup.html",
