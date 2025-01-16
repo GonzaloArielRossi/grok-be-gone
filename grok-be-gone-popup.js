@@ -41,7 +41,7 @@ async function main() {
   const checklist = document.querySelector('#grok-gone-checklist');
   const storeState = await chrome.storage.sync.get();
   SIDEBAR_ITEMS.forEach((item) => {
-    const isChecked = storeState[item.id] ?? true;
+    const isChecked = storeState[item.id] ?? false;
     const li = document.createElement('li');
     const img = document.createElement('img');
     img.src = `./assets/sidebar-logos/${item.id}-logo.svg`;
