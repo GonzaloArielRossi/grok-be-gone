@@ -2,7 +2,7 @@
   "name": "Grok Be Gone!",
   "version": "1.1",
   "manifest_version": 3,
-  "description": "Remove clutter from X's sidebar",
+  "description": "Remove GROK spam from your life!",
   "permissions": ["activeTab", "storage"],
   "host_permissions": ["https://x.com/*"],
   "action": {
