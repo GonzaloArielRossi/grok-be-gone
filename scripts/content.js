@@ -90,7 +90,7 @@ const OPTIONS = {
     id: 'profileSummary',
     label: 'Summary',
     selector:
-      'div[data-testid="HoverCard"] > div > div > div:last-child:has(> button)',
+      'div[data-testid="HoverCard"] > div > div > div:last-child:has(> button), div:has(> div[data-testid="placementTracking"]) > :nth-child(2)',
     display: 'none',
     location: LOCATIONS.GROK
   },
