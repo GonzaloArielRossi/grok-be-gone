@@ -2,7 +2,7 @@
   "name": "Grok Be Gone!",
   "version": "1.2",
   "manifest_version": 3,
-  "description": "Remove GROK spam from your life!",
+  "description": "Remove GROK from your life!",
   "permissions": ["activeTab", "storage"],
   "host_permissions": ["https://x.com/*"],
   "action": {
