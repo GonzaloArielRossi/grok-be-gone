@@ -1,46 +1,84 @@
-const SIDEBAR_ITEMS = [
+const SECTIONS = {
+  SIDEBAR: 'sidebar',
+  GROK: 'grok'
+};
+
+const OPTIONS = [
   {
     id: 'grok',
-    label: 'Grok'
+    label: 'Grok',
+    section: SECTIONS.SIDEBAR
   },
   {
     id: 'communities',
-    label: 'Communities'
+    label: 'Communities',
+    section: SECTIONS.SIDEBAR
   },
   {
     id: 'premium',
-    label: 'Premium'
+    label: 'Premium',
+    section: SECTIONS.SIDEBAR
   },
   {
     id: 'verified-orgs',
-    label: 'Verified Orgs'
+    label: 'Verified Orgs',
+    section: SECTIONS.SIDEBAR
   },
   {
     id: 'lists',
-    label: 'Lists'
+    label: 'Lists',
+    section: SECTIONS.SIDEBAR
   },
   {
     id: 'monetization',
-    label: 'Monetization'
+    label: 'Monetization',
+    section: SECTIONS.SIDEBAR
   },
   {
     id: 'ads',
-    label: 'Ads'
+    label: 'Ads',
+    section: SECTIONS.SIDEBAR
   },
   {
     id: 'jobs',
-    label: 'Jobs'
+    label: 'Jobs',
+    section: SECTIONS.SIDEBAR
   },
   {
     id: 'spaces',
-    label: 'Spaces'
+    label: 'Spaces',
+    section: SECTIONS.SIDEBAR
+  },
+  {
+    id: 'drawer',
+    label: 'Drawer',
+    section: SECTIONS.GROK
+  },
+  {
+    id: 'profileSummary',
+    label: 'Summary',
+    section: SECTIONS.GROK
+  },
+  {
+    id: 'postEnhancer',
+    label: 'Enhance',
+    section: SECTIONS.GROK
+  },
+  {
+    id: 'postExplainer',
+    label: 'Explain',
+    section: SECTIONS.GROK
   }
 ];
 
 async function main() {
-  const checklist = document.querySelector('#grok-gone-checklist');
+  const sidebarChecklist = document.querySelector(
+    '#grok-gone-sidebar-checklist'
+  );
+  const grokChecklist = document.querySelector('#grok-gone-grok-checklist');
+
   const storeState = await chrome.storage.sync.get();
-  SIDEBAR_ITEMS.forEach((item) => {
+  OPTIONS.forEach((item) => {
     const isChecked = storeState[item.id] ?? false;
     const li = document.createElement('li');
     const img = document.createElement('img');
@@ -78,7 +116,13 @@ async function main() {
       const e = new Event('change');
       input.dispatchEvent(e);
     });
-    checklist.append(li);
+
+    if (item.section === SECTIONS.SIDEBAR) {
+      sidebarChecklist.append(li);
+    }
+    if (item.section === SECTIONS.GROK) {
+      grokChecklist.append(li);
+    }
   });
 
   document.querySelector('#select-all').addEventListener('click', () => {

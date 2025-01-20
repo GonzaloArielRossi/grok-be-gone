@@ -1,70 +1,113 @@
 const LOCATIONS = {
   SIDEBAR: 'sidebar',
-  DROPDOWN: 'dropdown'
+  DROPDOWN: 'dropdown',
+  GROK: 'grok'
 };
-const SIDEBAR_ITEMS = {
+
+function getHrefSelector(option) {
+  const role = option.location === LOCATIONS.SIDEBAR ? 'banner' : 'menu';
+  return `[role="${role}"] a[href*="${option.selector}"]`;
+}
+
+function getSelector(option) {
+  return option.location === LOCATIONS.GROK
+    ? option.selector
+    : getHrefSelector(option);
+}
+
+const OPTIONS = {
   grok: {
     id: 'grok',
     label: 'Grok',
-    hrefSelector: 'grok',
+    selector: 'grok',
     display: 'none',
     location: LOCATIONS.SIDEBAR
   },
   communities: {
     id: 'communities',
     label: 'Communities',
-    hrefSelector: 'communities',
+    selector: 'communities',
     display: 'none',
     location: LOCATIONS.SIDEBAR
   },
   premium: {
     id: 'premium',
     label: 'Premium',
-    hrefSelector: 'premium',
+    selector: 'premium',
     display: 'none',
     location: LOCATIONS.SIDEBAR
   },
   'verified-orgs': {
     id: 'verified-orgs',
     label: 'Verified Orgs',
-    hrefSelector: 'verified',
+    selector: 'verified',
     display: 'none',
     location: LOCATIONS.SIDEBAR
   },
   lists: {
     id: 'lists',
     label: 'Lists',
-    hrefSelector: 'lists',
+    selector: 'lists',
     display: 'none',
     location: LOCATIONS.DROPDOWN
   },
   monetization: {
     id: 'monetization',
     label: 'Monetization',
-    hrefSelector: 'monetization',
+    selector: 'monetization',
     display: 'none',
     location: LOCATIONS.DROPDOWN
   },
   ads: {
     id: 'ads',
     label: 'Ads',
-    hrefSelector: 'ads',
+    selector: 'ads',
     display: 'none',
     location: LOCATIONS.DROPDOWN
   },
   jobs: {
     id: 'jobs',
     label: 'Jobs',
-    hrefSelector: 'jobs',
+    selector: 'jobs',
     display: 'none',
     location: LOCATIONS.DROPDOWN
   },
   spaces: {
     id: 'spaces',
     label: 'Spaces',
-    hrefSelector: 'spaces',
+    selector: 'spaces',
     display: 'none',
     location: LOCATIONS.DROPDOWN
+  },
+  drawer: {
+    id: 'drawer',
+    label: 'Drawer',
+    selector: 'div[data-testid="GrokDrawer"]',
+    display: 'none',
+    location: LOCATIONS.GROK
+  },
+  profileSummary: {
+    id: 'profileSummary',
+    label: 'Summary',
+    selector:
+      'div[data-testid="HoverCard"] > div > div > div:last-child:has(> button)',
+    display: 'none',
+    location: LOCATIONS.GROK
+  },
+  postEnhancer: {
+    id: 'postEnhancer',
+    label: 'Enhance',
+    selector:
+      'div[role="tablist"] div[role="presentation"]:has(> button[data-testid="grokImgGen"])',
+    display: 'none',
+    location: LOCATIONS.GROK
+  },
+  postExplainer: {
+    id: 'postExplainer',
+    label: 'Explain',
+    selector: 'article div:has(> button[aria-label*="Grok"])',
+    display: 'none',
+    location: LOCATIONS.GROK
   }
 };
 
@@ -72,20 +115,12 @@ function createAndAppendStyleElement(targetItems) {
   const style = document.createElement('style');
 
   targetItems.forEach((targetItem) => {
-    if (targetItem.location === LOCATIONS.SIDEBAR) {
-      style.innerHTML += `
-      [role="banner"] a[href*="${targetItem.hrefSelector}"] {
+    const selector = getSelector(targetItem);
+    style.innerHTML += `
+      ${selector} {
         display: ${targetItem.display} !important;
       }
-      `;
-    }
-    if (targetItem.location === LOCATIONS.DROPDOWN) {
-      style.innerHTML += `
-      [role="menu"] a[href*="${targetItem.hrefSelector}"] {
-        display: ${targetItem.display} !important;
-      }
-      `;
-    }
+    `;
   });
 
   document.head.append(style);
@@ -93,7 +128,7 @@ function createAndAppendStyleElement(targetItems) {
 
 chrome.runtime.onMessage.addListener((msg) => {
   if (msg.type === 'optionChange') {
-    const targetItem = SIDEBAR_ITEMS[msg.id];
+    const targetItem = OPTIONS[msg.id];
     targetItem.display = msg.checked ? 'none' : 'flex';
     createAndAppendStyleElement([targetItem]);
   }
@@ -104,7 +139,7 @@ chrome.storage.sync.get(null, (data) => {
   if (options) {
     const targetItems = [];
     Object.keys(options).forEach((key) => {
-      const targetItem = SIDEBAR_ITEMS[key];
+      const targetItem = OPTIONS[key];
       targetItem.display = options[key] ? 'none' : 'flex';
       targetItems.push(targetItem);
     });
