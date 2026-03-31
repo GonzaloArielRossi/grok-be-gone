@@ -4,9 +4,18 @@ const LOCATIONS = {
   GROK: 'grok'
 };
 
+const ROLES = {
+  BANNER: 'banner',
+  LINK: 'link',
+  MENU: 'menu',
+  NONE: null
+};
+
 function getHrefSelector(option) {
-  const role = option.location === LOCATIONS.SIDEBAR ? 'banner' : 'menu';
-  return `[role="${role}"] a[href*="${option.selector}"]`;
+  if (option.role === ROLES.LINK) {
+    return `[role="${option.role}"][href*="${option.selector}"]`;
+  }
+  return `[role="${option.role}"] a[href*="${option.selector}"]`;
 }
 
 function getSelector(option) {
@@ -21,6 +30,7 @@ const OPTIONS = {
     label: 'Grok',
     selector: 'grok',
     display: 'none',
+    role: ROLES.BANNER,
     location: LOCATIONS.SIDEBAR
   },
   communities: {
@@ -28,6 +38,7 @@ const OPTIONS = {
     label: 'Communities',
     selector: 'communities',
     display: 'none',
+    role: ROLES.LINK,
     location: LOCATIONS.SIDEBAR
   },
   premium: {
@@ -35,13 +46,23 @@ const OPTIONS = {
     label: 'Premium',
     selector: 'premium',
     display: 'none',
+    role: ROLES.BANNER,
     location: LOCATIONS.SIDEBAR
   },
-  'verified-orgs': {
-    id: 'verified-orgs',
-    label: 'Verified Orgs',
-    selector: 'verified',
+  creatorsStudio: {
+    id: 'creatorsStudio',
+    label: 'Creators Studio',
+    selector: 'creators/studio',
     display: 'none',
+    role: ROLES.LINK,
+    location: LOCATIONS.SIDEBAR
+  },
+  business: {
+    id: 'business',
+    label: 'Business',
+    selector: 'verified-orgs-signup',
+    display: 'none',
+    role: ROLES.LINK,
     location: LOCATIONS.SIDEBAR
   },
   lists: {
@@ -49,6 +70,7 @@ const OPTIONS = {
     label: 'Lists',
     selector: 'lists',
     display: 'none',
+    role: ROLES.MENU,
     location: LOCATIONS.DROPDOWN
   },
   monetization: {
@@ -56,6 +78,7 @@ const OPTIONS = {
     label: 'Monetization',
     selector: 'monetization',
     display: 'none',
+    role: ROLES.MENU,
     location: LOCATIONS.DROPDOWN
   },
   ads: {
@@ -63,6 +86,7 @@ const OPTIONS = {
     label: 'Ads',
     selector: 'ads',
     display: 'none',
+    role: ROLES.MENU,
     location: LOCATIONS.DROPDOWN
   },
   jobs: {
@@ -70,6 +94,7 @@ const OPTIONS = {
     label: 'Jobs',
     selector: 'jobs',
     display: 'none',
+    role: ROLES.MENU,
     location: LOCATIONS.DROPDOWN
   },
   spaces: {
@@ -77,6 +102,7 @@ const OPTIONS = {
     label: 'Spaces',
     selector: 'spaces',
     display: 'none',
+    role: ROLES.MENU,
     location: LOCATIONS.DROPDOWN
   },
   drawer: {
@@ -84,6 +110,7 @@ const OPTIONS = {
     label: 'Drawer',
     selector: 'div[data-testid="GrokDrawer"]',
     display: 'none',
+    role: ROLES.NONE,
     location: LOCATIONS.GROK
   },
   profileSummary: {
@@ -92,6 +119,7 @@ const OPTIONS = {
     selector:
       'div[data-testid="HoverCard"] > div > div > div:last-child:has(> button), div:has(> div[data-testid="placementTracking"]) > :nth-child(2)',
     display: 'none',
+    role: ROLES.NONE,
     location: LOCATIONS.GROK
   },
   postEnhancer: {
@@ -100,6 +128,7 @@ const OPTIONS = {
     selector:
       'div[role="tablist"] div[role="presentation"]:has(> button[data-testid="grokImgGen"])',
     display: 'none',
+    role: ROLES.NONE,
     location: LOCATIONS.GROK
   },
   postExplainer: {
@@ -107,6 +136,7 @@ const OPTIONS = {
     label: 'Explain',
     selector: 'article div:has(> button[aria-label*="Grok"])',
     display: 'none',
+    role: ROLES.NONE,
     location: LOCATIONS.GROK
   }
 };
@@ -126,7 +156,7 @@ function createAndAppendStyleElement(targetItems) {
   document.head.append(style);
 }
 
-chrome.runtime.onMessage.addListener((msg) => {
+browser.runtime.onMessage.addListener((msg) => {
   if (msg.type === 'optionChange') {
     const targetItem = OPTIONS[msg.id];
     targetItem.display = msg.checked ? 'none' : 'flex';
@@ -134,7 +164,7 @@ chrome.runtime.onMessage.addListener((msg) => {
   }
 });
 
-chrome.storage.sync.get(null, (data) => {
+browser.storage.sync.get(null).then((data) => {
   const options = data;
   if (options) {
     const targetItems = [];

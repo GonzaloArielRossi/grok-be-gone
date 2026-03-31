@@ -20,8 +20,13 @@ const OPTIONS = [
     section: SECTIONS.SIDEBAR
   },
   {
-    id: 'verified-orgs',
-    label: 'Verified Orgs',
+    id: 'creatorsStudio',
+    label: 'Creators Studio',
+    section: SECTIONS.SIDEBAR
+  },
+  {
+    id: 'business',
+    label: 'Business',
     section: SECTIONS.SIDEBAR
   },
   {
@@ -77,7 +82,7 @@ async function main() {
   );
   const grokChecklist = document.querySelector('#grok-gone-grok-checklist');
 
-  const storeState = await chrome.storage.sync.get();
+  const storeState = await browser.storage.sync.get();
   OPTIONS.forEach((item) => {
     const isChecked = storeState[item.id] ?? false;
     const li = document.createElement('li');
@@ -92,18 +97,19 @@ async function main() {
     label.htmlFor = item.id;
     label.textContent = item.label;
     li.append(img, input, label);
-    input.addEventListener('change', () => {
-      chrome.storage.sync.set({ [item.id]: input.checked });
-      chrome.tabs.query({ url: 'https://x.com/*' }, (tabs) => {
-        if (!tabs.length) return;
-        tabs.forEach((tab) => {
-          chrome.tabs.sendMessage(tab.id, {
+    input.addEventListener('change', async () => {
+      await browser.storage.sync.set({ [item.id]: input.checked });
+      const tabs = await browser.tabs.query({ url: 'https://x.com/*' });
+      if (!tabs.length) return;
+      await Promise.all(
+        tabs.map((tab) =>
+          browser.tabs.sendMessage(tab.id, {
             type: 'optionChange',
             id: item.id,
             checked: input.checked
-          });
-        });
-      });
+          })
+        )
+      );
     });
     input.addEventListener('click', (event) => {
       event.stopPropagation();
