@@ -1,3 +1,8 @@
+const ext =
+  typeof globalThis.browser !== 'undefined'
+    ? globalThis.browser
+    : globalThis.chrome;
+
 const LOCATIONS = {
   SIDEBAR: 'sidebar',
   DROPDOWN: 'dropdown',
@@ -143,20 +148,17 @@ const OPTIONS = {
 
 function createAndAppendStyleElement(targetItems) {
   const style = document.createElement('style');
-
-  targetItems.forEach((targetItem) => {
-    const selector = getSelector(targetItem);
-    style.innerHTML += `
-      ${selector} {
-        display: ${targetItem.display} !important;
-      }
-    `;
-  });
-
+  const css = targetItems
+    .map((targetItem) => {
+      const selector = getSelector(targetItem);
+      return `${selector} {\n  display: ${targetItem.display} !important;\n}`;
+    })
+    .join('\n');
+  style.textContent = css;
   document.head.append(style);
 }
 
-browser.runtime.onMessage.addListener((msg) => {
+ext.runtime.onMessage.addListener((msg) => {
   if (msg.type === 'optionChange') {
     const targetItem = OPTIONS[msg.id];
     targetItem.display = msg.checked ? 'none' : 'flex';
@@ -164,7 +166,7 @@ browser.runtime.onMessage.addListener((msg) => {
   }
 });
 
-browser.storage.sync.get(null).then((data) => {
+ext.storage.sync.get(null).then((data) => {
   const options = data;
   if (options) {
     const targetItems = [];
