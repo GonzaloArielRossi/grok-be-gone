@@ -1,15 +1,21 @@
 # Grok Be Gone!
+Tired of Grok AI taking over your 𝕏 experience? Take it back.
+Grok Be Gone! wipes Grok buttons clean off the UI, scrubs Grok posts and mentions straight out of your feed, and declutters your sidebar.
+No Grok AI. No noise. Just 𝕏 the way you want it.
+Fully customizable. Totally in your hands.
 
-Grok Be Gone!
-Take control of your 𝕏 experience with Grok Be Gone! This extension lets you effortlessly remove all the distracting Grok buttons cluttering the UI.
-Not just that—you can de-clutter your sidebar by removing unnecessary items, tailoring 𝕏 to suit your preferences.
-With fully customizable options, you decide what stays and what goes. Make your 𝕏 experience truly your own!
+## Stats
 
-⭐4.7 stars 
-👤 +2k users
+⭐ 4.7 stars
 
-[🔗 Visit in Chrome Store](https://chromewebstore.google.com/detail/grok-be-gone/pooagggdflijbacfbaphaehojpgmkfcg)
+👤 +2k users  
 
-![Grok be gone! 1](https://github.com/user-attachments/assets/d8fd63f4-b728-4664-aaee-7ee3a602a22e)
-![Grok be gone! 2](https://github.com/user-attachments/assets/ddacbab4-05bd-4a05-9719-e6082b709faa)
-![Grok be gone! 3](https://github.com/user-attachments/assets/b76c32f6-79d9-4062-8a90-9ae8df1bdf72)
+## Download
+
+- [Visit in Chrome Store](https://chromewebstore.google.com/detail/grok-be-gone/pooagggdflijbacfbaphaehojpgmkfcg)
+- [Visit in Firefox Store](https://addons.mozilla.org/en-US/firefox/addon/grok-be-gone)
+
+## Screenshots
+![Grok be gone! 1](https://i.imgur.com/mEUAmm9.png)
+![Grok be gone! 2](https://i.imgur.com/rAhSoL5.png)
+![Grok be gone! 3](https://i.imgur.com/5CaRFXk.png)
