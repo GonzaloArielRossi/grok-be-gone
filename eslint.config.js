@@ -57,7 +57,13 @@ module.exports = [
     }
   },
   {
-    files: ['scripts/sync-manifest-firefox.js', 'scripts/build-firefox.js'],
+    files: [
+      'scripts/sync-manifest-firefox.js',
+      'scripts/build-firefox.js',
+      'scripts/release-chrome.js',
+      'scripts/release-firefox.js',
+      'scripts/release-all.js',
+    ],
     languageOptions: {
       sourceType: 'commonjs',
       globals: {
