@@ -1,3 +1,7 @@
+html {
+  overflow-x: hidden;
+}
+
 body {
   margin: 0;
   padding: 0;
@@ -9,9 +13,10 @@ body {
   color: #ddd;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  overflow: hidden;
+  justify-content: flex-start;
+  align-items: stretch;
+  overflow-x: hidden;
+  overflow-y: auto;
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
 }
@@ -39,8 +44,6 @@ ul.checklist {
   padding-left: 16px;
   padding-right: 16px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-  overflow: hidden;
-  height: '100%';
 }
 
 ul.checklist li {
@@ -50,6 +53,7 @@ ul.checklist li {
   border-radius: 6px;
   margin-bottom: 8px;
   width: 100%;
+  min-width: 0;
   cursor: pointer;
   pointer-events: auto;
 }
@@ -99,10 +103,13 @@ ul.checklist input[type='checkbox']:checked::before {
 }
 
 ul.checklist label {
+  flex: 1;
+  min-width: 0;
   font-size: 16px;
   color: #ddd;
   transition: color 0.3s ease;
   cursor: pointer;
+  overflow-wrap: break-word;
 }
 
 ul.checklist input[type='checkbox']:checked + label {
@@ -144,10 +151,20 @@ h2 {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   text-align: center;
   display: flex;
-  justify-content: space-around;
+  flex-wrap: wrap;
+  justify-content: center;
   align-items: center;
+  gap: 12px;
+}
+
+.header h1 {
+  margin: 0;
+  min-width: 0;
 }
 
 .section {
-  width: 95%;
+  width: 100%;
+  max-width: 100%;
+  padding: 0 8px;
+  box-sizing: border-box;
 }
