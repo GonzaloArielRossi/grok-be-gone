@@ -186,6 +186,33 @@ function scanPremiumPromos() {
 
 let premiumPromoObserver = null;
 let premiumPromoDebounce = null;
+let pendingPremiumRecords = [];
+
+function processPremiumPromoMutations(records) {
+  const shells = new Set();
+  const addShell = (el) => {
+    const shell = premiumPromoHideShell(el);
+    if (shell) shells.add(shell);
+  };
+  for (const record of records) {
+    for (const node of record.addedNodes) {
+      if (node.nodeType !== Node.ELEMENT_NODE) continue;
+      if (node.matches?.('[aria-label="Subscribe to Premium"]')) addShell(node);
+      node
+        .querySelectorAll('[aria-label="Subscribe to Premium"]')
+        .forEach(addShell);
+      if (node.matches?.('a[href*="premium_sign_up"]')) {
+        const root = rootForPremiumSignupLink(node);
+        if (root) addShell(root);
+      }
+      node.querySelectorAll('a[href*="premium_sign_up"]').forEach((a) => {
+        const root = rootForPremiumSignupLink(a);
+        if (root) addShell(root);
+      });
+    }
+  }
+  shells.forEach((el) => el.classList.add(PREMIUM_PROMO_CLASS));
+}
 
 function ensurePremiumPromoHideStyle() {
   if (document.getElementById(PREMIUM_PROMO_STYLE_ID)) return;
@@ -208,17 +235,25 @@ function setPremiumPromoEnabled(enabled) {
     premiumPromoObserver.disconnect();
     premiumPromoObserver = null;
   }
+  pendingPremiumRecords = [];
   if (enabled) {
     ensurePremiumPromoHideStyle();
     scanPremiumPromos();
-    premiumPromoObserver = new MutationObserver(() => {
+    premiumPromoObserver = new MutationObserver((records) => {
+      pendingPremiumRecords.push(...records);
       if (premiumPromoDebounce !== null) clearTimeout(premiumPromoDebounce);
       premiumPromoDebounce = setTimeout(() => {
         premiumPromoDebounce = null;
-        scanPremiumPromos();
+        const toProcess = pendingPremiumRecords;
+        pendingPremiumRecords = [];
+        processPremiumPromoMutations(toProcess);
       }, 120);
     });
-    premiumPromoObserver.observe(document.documentElement, {
+    const premiumObserverRoot =
+      document.querySelector('main[role="main"]') ||
+      document.querySelector('[data-testid="primaryColumn"]') ||
+      document.documentElement;
+    premiumPromoObserver.observe(premiumObserverRoot, {
       childList: true,
       subtree: true
     });
