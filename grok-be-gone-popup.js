@@ -53,13 +53,17 @@ async function notifyTabsOptionChange(id, checked) {
   const tabs = await ext.tabs.query({ url: 'https://x.com/*' });
   if (!tabs.length) return;
   await Promise.all(
-    tabs.map((tab) =>
-      ext.tabs.sendMessage(tab.id, {
-        type: 'optionChange',
-        id,
-        checked
-      })
-    )
+    tabs.map(async (tab) => {
+      try {
+        await ext.tabs.sendMessage(tab.id, {
+          type: 'optionChange',
+          id,
+          checked
+        });
+      } catch {
+        // No content script in this tab yet (loading, bfcache, or pre-navigation).
+      }
+    })
   );
 }
 
