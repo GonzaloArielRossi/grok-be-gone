@@ -1,9 +1,8 @@
 #!/usr/bin/env node
 /**
- * Writes firefox/manifest.json from manifest.json (same content).
- * Chrome uses background.service_worker; Firefox uses background.scripts (MV3).
- * Root manifest lists both per MDN cross-browser guidance.
- * Load Temporary Add-on in Firefox: firefox/manifest.json
+ * Writes firefox/manifest.json from manifest.json.
+ * Chrome MV3 rejects background.scripts; Firefox MV3 runs the background via scripts
+ * (not service_worker). Root manifest stays Chrome-valid; this output is Firefox-only.
  */
 const fs = require('fs');
 const path = require('path');
@@ -26,5 +25,6 @@ if (!fs.existsSync(firefoxDir)) {
   fs.mkdirSync(firefoxDir, { recursive: true });
 }
 
-fs.writeFileSync(outPath, `${JSON.stringify(m, null, 2)}\n`);
+const firefox = { ...m, background: { scripts: [sw] } };
+fs.writeFileSync(outPath, `${JSON.stringify(firefox, null, 2)}\n`);
 console.log('Wrote firefox/manifest.json');
