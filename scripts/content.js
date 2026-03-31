@@ -3,6 +3,32 @@ const ext =
     ? globalThis.browser
     : globalThis.chrome;
 
+function appendStyleToHead(style) {
+  const h = document.head;
+  if (h) h.append(style);
+  else document.documentElement.append(style);
+}
+
+/** Keep in sync with scripts/background.js INSTALL_DEFAULT_HIDE_IDS */
+const INSTALL_DEFAULT_HIDE_IDS = [
+  'grok',
+  'communities',
+  'premium',
+  'creatorsStudio',
+  'business',
+  'lists',
+  'monetization',
+  'ads',
+  'jobs',
+  'spaces',
+  'drawer',
+  'profileSummary',
+  'postEnhancer',
+  'postExplainer',
+  'postsWithGrokTag',
+  'premiumSubscribePromo'
+];
+
 const LOCATIONS = {
   SIDEBAR: 'sidebar',
   DROPDOWN: 'dropdown',
@@ -63,8 +89,9 @@ function scanArticlesForGrokTag() {
 }
 
 let grokTagObserver = null;
-let grokTagDebounce = null;
+let grokTagFlushScheduled = false;
 let pendingGrokTagRecords = [];
+let postsWithGrokTagActive = false;
 
 function processGrokTagMutations(records) {
   const articles = new Set();
@@ -110,7 +137,7 @@ article.${GROK_TAG_CLASS} {
   display: none !important;
 }
 `.trim();
-  document.head.append(style);
+  appendStyleToHead(style);
 }
 
 function removeGrokTagHideStyle() {
@@ -118,10 +145,8 @@ function removeGrokTagHideStyle() {
 }
 
 function setPostsWithGrokTagEnabled(enabled) {
-  if (grokTagDebounce !== null) {
-    clearTimeout(grokTagDebounce);
-    grokTagDebounce = null;
-  }
+  postsWithGrokTagActive = enabled;
+  grokTagFlushScheduled = false;
   if (grokTagObserver) {
     grokTagObserver.disconnect();
     grokTagObserver = null;
@@ -132,19 +157,16 @@ function setPostsWithGrokTagEnabled(enabled) {
     scanArticlesForGrokTag();
     grokTagObserver = new MutationObserver((records) => {
       pendingGrokTagRecords.push(...records);
-      if (grokTagDebounce !== null) clearTimeout(grokTagDebounce);
-      grokTagDebounce = setTimeout(() => {
-        grokTagDebounce = null;
+      if (grokTagFlushScheduled) return;
+      grokTagFlushScheduled = true;
+      queueMicrotask(() => {
+        grokTagFlushScheduled = false;
         const toProcess = pendingGrokTagRecords;
         pendingGrokTagRecords = [];
         processGrokTagMutations(toProcess);
-      }, 120);
+      });
     });
-    const grokObserverRoot =
-      document.querySelector('main[role="main"]') ||
-      document.querySelector('[data-testid="primaryColumn"]') ||
-      document.documentElement;
-    grokTagObserver.observe(grokObserverRoot, {
+    grokTagObserver.observe(document.documentElement, {
       childList: true,
       subtree: true
     });
@@ -221,8 +243,9 @@ function scanPremiumPromos() {
 }
 
 let premiumPromoObserver = null;
-let premiumPromoDebounce = null;
+let premiumPromoFlushScheduled = false;
 let pendingPremiumRecords = [];
+let premiumPromoActive = false;
 
 function processPremiumPromoMutations(records) {
   const shells = new Set();
@@ -255,7 +278,7 @@ function ensurePremiumPromoHideStyle() {
   const style = document.createElement('style');
   style.id = PREMIUM_PROMO_STYLE_ID;
   style.textContent = `.${PREMIUM_PROMO_CLASS} { display: none !important; }`;
-  document.head.append(style);
+  appendStyleToHead(style);
 }
 
 function removePremiumPromoHideStyle() {
@@ -263,10 +286,8 @@ function removePremiumPromoHideStyle() {
 }
 
 function setPremiumPromoEnabled(enabled) {
-  if (premiumPromoDebounce !== null) {
-    clearTimeout(premiumPromoDebounce);
-    premiumPromoDebounce = null;
-  }
+  premiumPromoActive = enabled;
+  premiumPromoFlushScheduled = false;
   if (premiumPromoObserver) {
     premiumPromoObserver.disconnect();
     premiumPromoObserver = null;
@@ -277,19 +298,16 @@ function setPremiumPromoEnabled(enabled) {
     scanPremiumPromos();
     premiumPromoObserver = new MutationObserver((records) => {
       pendingPremiumRecords.push(...records);
-      if (premiumPromoDebounce !== null) clearTimeout(premiumPromoDebounce);
-      premiumPromoDebounce = setTimeout(() => {
-        premiumPromoDebounce = null;
+      if (premiumPromoFlushScheduled) return;
+      premiumPromoFlushScheduled = true;
+      queueMicrotask(() => {
+        premiumPromoFlushScheduled = false;
         const toProcess = pendingPremiumRecords;
         pendingPremiumRecords = [];
         processPremiumPromoMutations(toProcess);
-      }, 120);
+      });
     });
-    const premiumObserverRoot =
-      document.querySelector('main[role="main"]') ||
-      document.querySelector('[data-testid="primaryColumn"]') ||
-      document.documentElement;
-    premiumPromoObserver.observe(premiumObserverRoot, {
+    premiumPromoObserver.observe(document.documentElement, {
       childList: true,
       subtree: true
     });
@@ -436,17 +454,100 @@ const OPTIONS = {
   }
 };
 
-function createAndAppendStyleElement(targetItems) {
-  const style = document.createElement('style');
+const BOOTSTRAP_STYLE_ID = 'grok-be-gone-bootstrap-style';
+const MAIN_STYLE_ID = 'grok-be-gone-main-css';
+const SESSION_PREFS_KEY = 'grok-be-gone:prefs-v1';
+
+function buildCssFromPrefs(prefs) {
+  const lines = [];
+  for (const key of Object.keys(OPTIONS)) {
+    const opt = OPTIONS[key];
+    if (opt.skipCss) continue;
+    const hide = prefs[key] === true;
+    lines.push(
+      `${getSelector(opt)} {\n  display: ${hide ? 'none' : 'flex'} !important;\n}`
+    );
+  }
+  return lines.join('\n');
+}
+
+function resolvePrefs(raw) {
+  const out = {};
+  for (const key of Object.keys(OPTIONS)) {
+    if (raw && Object.prototype.hasOwnProperty.call(raw, key)) {
+      out[key] = !!raw[key];
+    } else {
+      out[key] = INSTALL_DEFAULT_HIDE_IDS.includes(key);
+    }
+  }
+  return out;
+}
+
+function snapshotPrefs() {
+  const o = {};
+  for (const k of Object.keys(OPTIONS)) {
+    if (k === 'postsWithGrokTag') {
+      o[k] = postsWithGrokTagActive;
+    } else if (k === 'premiumSubscribePromo') {
+      o[k] = premiumPromoActive;
+    } else {
+      o[k] = OPTIONS[k].display === 'none';
+    }
+  }
+  return o;
+}
+
+function persistPrefsSnapshot() {
+  const snap = snapshotPrefs();
+  try {
+    sessionStorage.setItem(SESSION_PREFS_KEY, JSON.stringify(snap));
+  } catch {
+    /* sessionStorage may be unavailable */
+  }
+  void ext.storage.local.set({ prefsCache: snap });
+}
+
+function applyMainCssFromTargetItems(targetItems) {
+  document.getElementById(BOOTSTRAP_STYLE_ID)?.remove();
   const css = targetItems
-    .filter((targetItem) => !targetItem.skipCss)
-    .map((targetItem) => {
-      const selector = getSelector(targetItem);
-      return `${selector} {\n  display: ${targetItem.display} !important;\n}`;
-    })
+    .filter((t) => !t.skipCss)
+    .map((t) => `${getSelector(t)} {\n  display: ${t.display} !important;\n}`)
     .join('\n');
-  style.textContent = css;
-  document.head.append(style);
+  let el = document.getElementById(MAIN_STYLE_ID);
+  if (!el) {
+    el = document.createElement('style');
+    el.id = MAIN_STYLE_ID;
+    appendStyleToHead(el);
+  }
+  el.textContent = css;
+}
+
+function applyFullCssFromOptions() {
+  applyMainCssFromTargetItems(Object.values(OPTIONS).filter((o) => !o.skipCss));
+}
+
+function runEarlyBootstrap() {
+  let raw = null;
+  try {
+    raw = JSON.parse(sessionStorage.getItem(SESSION_PREFS_KEY) || 'null');
+  } catch {
+    raw = null;
+  }
+  const prefs = resolvePrefs(raw && typeof raw === 'object' ? raw : null);
+
+  const style = document.createElement('style');
+  style.id = BOOTSTRAP_STYLE_ID;
+  style.textContent = buildCssFromPrefs(prefs);
+  appendStyleToHead(style);
+
+  queueMicrotask(() => {
+    if (prefs.postsWithGrokTag) {
+      setPostsWithGrokTagEnabled(true);
+    }
+    if (prefs.premiumSubscribePromo) {
+      setPremiumPromoEnabled(true);
+    }
+  });
 }
 
 ext.runtime.onMessage.addListener((msg) => {
@@ -459,28 +560,45 @@ ext.runtime.onMessage.addListener((msg) => {
     } else if (targetItem.skipCss && msg.id === 'premiumSubscribePromo') {
       setPremiumPromoEnabled(msg.checked);
     } else if (!targetItem.skipCss) {
-      createAndAppendStyleElement([targetItem]);
+      applyFullCssFromOptions();
     }
+    persistPrefsSnapshot();
   }
 });
 
 function applyOptionsFromSync(data) {
   if (!data) return;
-  const targetItems = [];
+  const knownKeys = Object.keys(data).filter((k) => OPTIONS[k]);
+  if (knownKeys.length === 0) return;
+
   Object.keys(data).forEach((key) => {
     const targetItem = OPTIONS[key];
     if (!targetItem) return;
     targetItem.display = data[key] ? 'none' : 'flex';
-    targetItems.push(targetItem);
   });
-  createAndAppendStyleElement(targetItems);
+  applyFullCssFromOptions();
   setPostsWithGrokTagEnabled(data.postsWithGrokTag === true);
   setPremiumPromoEnabled(data.premiumSubscribePromo === true);
+  persistPrefsSnapshot();
 }
 
 let awaitPossibleInstallDefaults = false;
 
-ext.storage.sync.get(null).then((data) => {
+runEarlyBootstrap();
+
+void Promise.all([
+  ext.storage.sync.get(null),
+  ext.storage.local.get('prefsCache')
+]).then(([syncData, localWrap]) => {
+  const syncKeys = syncData
+    ? Object.keys(syncData).filter((k) => OPTIONS[k])
+    : [];
+  const data = syncKeys.length > 0 ? syncData : localWrap?.prefsCache || {};
+
+  if (!Object.keys(data).some((k) => OPTIONS[k])) {
+    return;
+  }
+
   awaitPossibleInstallDefaults = !Object.keys(OPTIONS).some((k) =>
     Object.prototype.hasOwnProperty.call(data, k)
   );
