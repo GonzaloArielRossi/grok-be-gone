@@ -143,16 +143,13 @@ const OPTIONS = {
 
 function createAndAppendStyleElement(targetItems) {
   const style = document.createElement('style');
-
-  targetItems.forEach((targetItem) => {
-    const selector = getSelector(targetItem);
-    style.innerHTML += `
-      ${selector} {
-        display: ${targetItem.display} !important;
-      }
-    `;
-  });
-
+  const css = targetItems
+    .map((targetItem) => {
+      const selector = getSelector(targetItem);
+      return `${selector} {\n  display: ${targetItem.display} !important;\n}`;
+    })
+    .join('\n');
+  style.textContent = css;
   document.head.append(style);
 }
 
