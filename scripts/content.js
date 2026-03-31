@@ -64,6 +64,27 @@ function scanArticlesForGrokTag() {
 
 let grokTagObserver = null;
 let grokTagDebounce = null;
+let pendingGrokTagRecords = [];
+
+function processGrokTagMutations(records) {
+  for (const record of records) {
+    for (const node of record.addedNodes) {
+      if (node.nodeType !== Node.ELEMENT_NODE) continue;
+      const articles = new Set();
+      if (node.matches?.('article[data-testid="tweet"]')) articles.add(node);
+      node
+        .querySelectorAll('article[data-testid="tweet"]')
+        .forEach((a) => articles.add(a));
+      for (const article of articles) {
+        if (articleMentionsGrok(article)) {
+          article.classList.add(GROK_TAG_CLASS);
+        } else if (article.classList.contains(GROK_TAG_CLASS)) {
+          article.classList.remove(GROK_TAG_CLASS);
+        }
+      }
+    }
+  }
+}
 
 function ensureGrokTagHideStyle() {
   if (document.getElementById(GROK_TAG_STYLE_ID)) return;
@@ -94,14 +115,18 @@ function setPostsWithGrokTagEnabled(enabled) {
     grokTagObserver.disconnect();
     grokTagObserver = null;
   }
+  pendingGrokTagRecords = [];
   if (enabled) {
     ensureGrokTagHideStyle();
     scanArticlesForGrokTag();
-    grokTagObserver = new MutationObserver(() => {
+    grokTagObserver = new MutationObserver((records) => {
+      pendingGrokTagRecords.push(...records);
       if (grokTagDebounce !== null) clearTimeout(grokTagDebounce);
       grokTagDebounce = setTimeout(() => {
         grokTagDebounce = null;
-        scanArticlesForGrokTag();
+        const toProcess = pendingGrokTagRecords;
+        pendingGrokTagRecords = [];
+        processGrokTagMutations(toProcess);
       }, 120);
     });
     const grokObserverRoot =
