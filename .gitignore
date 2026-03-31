@@ -5,7 +5,7 @@ _debug
 _metadata
 dist
 *.swp # vim temp files
-releases/
-firefox
-build-firefox
+/releases
+/firefox
+
 
