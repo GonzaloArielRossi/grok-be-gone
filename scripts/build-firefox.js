@@ -17,13 +17,22 @@ if (!fs.existsSync(manifestInFirefox)) {
   process.exit(1);
 }
 
-for (const name of ['scripts', 'assets']) {
-  const dest = path.join(firefoxDir, name);
-  if (fs.existsSync(dest)) {
-    fs.rmSync(dest, { recursive: true });
-  }
-  fs.cpSync(path.join(root, name), dest, { recursive: true });
+const SCRIPT_FILES = ['background.js', 'content.js'];
+
+const scriptsDir = path.join(firefoxDir, 'scripts');
+if (fs.existsSync(scriptsDir)) {
+  fs.rmSync(scriptsDir, { recursive: true });
 }
+fs.mkdirSync(scriptsDir, { recursive: true });
+for (const file of SCRIPT_FILES) {
+  fs.copyFileSync(path.join(root, 'scripts', file), path.join(scriptsDir, file));
+}
+
+const assetsDir = path.join(firefoxDir, 'assets');
+if (fs.existsSync(assetsDir)) {
+  fs.rmSync(assetsDir, { recursive: true });
+}
+fs.cpSync(path.join(root, 'assets'), assetsDir, { recursive: true });
 
 for (const file of [
   'grok-be-gone-popup.html',
