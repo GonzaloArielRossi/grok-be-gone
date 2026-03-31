@@ -1,6 +1,6 @@
 {
   "name": "grok-be-gone",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "private": true,
   "description": "Remove clutter from X's sidebar",
   "scripts": {
