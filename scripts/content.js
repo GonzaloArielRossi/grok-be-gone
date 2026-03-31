@@ -104,7 +104,11 @@ function setPostsWithGrokTagEnabled(enabled) {
         scanArticlesForGrokTag();
       }, 120);
     });
-    grokTagObserver.observe(document.documentElement, {
+    const grokObserverRoot =
+      document.querySelector('main[role="main"]') ||
+      document.querySelector('[data-testid="primaryColumn"]') ||
+      document.documentElement;
+    grokTagObserver.observe(grokObserverRoot, {
       childList: true,
       subtree: true
     });
