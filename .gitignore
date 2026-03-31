@@ -7,3 +7,5 @@ _metadata
 dist
 *.swp # vim temp files
 releases/
+firefox/*
+!firefox/manifest.json

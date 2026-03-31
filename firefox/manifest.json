@@ -8,14 +8,23 @@
       "id": "grok-be-gone@gonzalorossi.dev",
       "strict_min_version": "140.0",
       "data_collection_permissions": {
-        "required": ["none"]
+        "required": [
+          "none"
+        ]
       }
     }
   },
-  "permissions": ["activeTab", "storage"],
-  "host_permissions": ["https://x.com/*"],
+  "permissions": [
+    "activeTab",
+    "storage"
+  ],
+  "host_permissions": [
+    "https://x.com/*"
+  ],
   "background": {
-    "service_worker": "scripts/background.js"
+    "scripts": [
+      "scripts/background.js"
+    ]
   },
   "action": {
     "default_popup": "grok-be-gone-popup.html",
@@ -23,8 +32,12 @@
   },
   "content_scripts": [
     {
-      "js": ["scripts/content.js"],
-      "matches": ["https://x.com/*"]
+      "js": [
+        "scripts/content.js"
+      ],
+      "matches": [
+        "https://x.com/*"
+      ]
     }
   ]
 }

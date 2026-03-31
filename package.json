@@ -4,6 +4,8 @@
   "private": true,
   "description": "Remove clutter from X's sidebar",
   "scripts": {
+    "sync:manifest-firefox": "node scripts/sync-manifest-firefox.js",
+    "build:firefox": "node scripts/sync-manifest-firefox.js && node scripts/build-firefox.js",
     "prettier": "npx prettier **/*.{md,html,json} -w",
     "lint": "eslint **/*.js",
     "lint:fix": "npm run lint -- --fix",
@@ -26,6 +28,10 @@
     "prettier": "3.3.3"
   },
   "lint-staged": {
+    "manifest.json": [
+      "node scripts/sync-manifest-firefox.js",
+      "git add firefox/manifest.json"
+    ],
     "**/*.js": [
       "npx eslint --fix"
     ],
