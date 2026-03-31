@@ -15,6 +15,7 @@
   "devDependencies": {
     "@eslint/js": "9.12.0",
     "@types/firefox-webext-browser": "120.0.3",
+    "chrome-types": "0.1.312",
     "eslint": "9.12.0",
     "eslint-config-prettier": "9.1.0",
     "eslint-plugin-jest": "28.8.3",

@@ -1,3 +1,8 @@
+const ext =
+  typeof globalThis.browser !== 'undefined'
+    ? globalThis.browser
+    : globalThis.chrome;
+
 const LOCATIONS = {
   SIDEBAR: 'sidebar',
   DROPDOWN: 'dropdown',
@@ -153,7 +158,7 @@ function createAndAppendStyleElement(targetItems) {
   document.head.append(style);
 }
 
-browser.runtime.onMessage.addListener((msg) => {
+ext.runtime.onMessage.addListener((msg) => {
   if (msg.type === 'optionChange') {
     const targetItem = OPTIONS[msg.id];
     targetItem.display = msg.checked ? 'none' : 'flex';
@@ -161,7 +166,7 @@ browser.runtime.onMessage.addListener((msg) => {
   }
 });
 
-browser.storage.sync.get(null).then((data) => {
+ext.storage.sync.get(null).then((data) => {
   const options = data;
   if (options) {
     const targetItems = [];

@@ -1,3 +1,8 @@
+const ext =
+  typeof globalThis.browser !== 'undefined'
+    ? globalThis.browser
+    : globalThis.chrome;
+
 const SECTIONS = {
   SIDEBAR: 'sidebar',
   GROK: 'grok'
@@ -82,7 +87,7 @@ async function main() {
   );
   const grokChecklist = document.querySelector('#grok-gone-grok-checklist');
 
-  const storeState = await browser.storage.sync.get();
+  const storeState = await ext.storage.sync.get();
   OPTIONS.forEach((item) => {
     const isChecked = storeState[item.id] ?? false;
     const li = document.createElement('li');
@@ -98,12 +103,12 @@ async function main() {
     label.textContent = item.label;
     li.append(img, input, label);
     input.addEventListener('change', async () => {
-      await browser.storage.sync.set({ [item.id]: input.checked });
-      const tabs = await browser.tabs.query({ url: 'https://x.com/*' });
+      await ext.storage.sync.set({ [item.id]: input.checked });
+      const tabs = await ext.tabs.query({ url: 'https://x.com/*' });
       if (!tabs.length) return;
       await Promise.all(
         tabs.map((tab) =>
-          browser.tabs.sendMessage(tab.id, {
+          ext.tabs.sendMessage(tab.id, {
             type: 'optionChange',
             id: item.id,
             checked: input.checked
