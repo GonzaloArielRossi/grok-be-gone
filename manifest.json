@@ -1,6 +1,6 @@
 {
   "name": "Grok Be Gone!",
-  "version": "1.4",
+  "version": "1.5",
   "manifest_version": 3,
   "description": "Remove GROK from your life!",
   "browser_specific_settings": {
@@ -12,7 +12,7 @@
       }
     }
   },
-  "permissions": ["activeTab", "storage", "tabs"],
+  "permissions": ["activeTab", "storage"],
   "host_permissions": ["https://x.com/*"],
   "action": {
     "default_popup": "grok-be-gone-popup.html",
