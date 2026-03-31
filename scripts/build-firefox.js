@@ -19,6 +19,17 @@ if (!fs.existsSync(manifestInFirefox)) {
 
 const SCRIPT_FILES = ['background.js', 'content.js'];
 
+const missing = SCRIPT_FILES.filter(
+  (f) => !fs.existsSync(path.join(root, 'scripts', f))
+);
+if (missing.length) {
+  console.error(
+    'Missing required extension scripts:\n  ' +
+      missing.map((f) => `scripts/${f}`).join('\n  ')
+  );
+  process.exit(1);
+}
+
 const scriptsDir = path.join(firefoxDir, 'scripts');
 if (fs.existsSync(scriptsDir)) {
   fs.rmSync(scriptsDir, { recursive: true });
