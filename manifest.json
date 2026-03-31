@@ -3,7 +3,13 @@
   "version": "1.2",
   "manifest_version": 3,
   "description": "Remove GROK from your life!",
-  "permissions": ["activeTab", "storage"],
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "grok-be-gone@gonzalorossi.dev",
+      "strict_min_version": "121.0"
+    }
+  },
+  "permissions": ["activeTab", "storage", "tabs"],
   "host_permissions": ["https://x.com/*"],
   "action": {
     "default_popup": "grok-be-gone-popup.html",
