@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 /**
- * Writes firefox/manifest.json from manifest.json (background.scripts only).
- * Load Temporary Add-on in Firefox by selecting firefox/manifest.json — not the
- * repo-root manifest.json (that one is Chrome MV3: service_worker only).
+ * Writes firefox/manifest.json from manifest.json (same content).
+ * Chrome uses background.service_worker; Firefox uses background.scripts (MV3).
+ * Root manifest lists both per MDN cross-browser guidance.
+ * Load Temporary Add-on in Firefox: firefox/manifest.json
  */
 const fs = require('fs');
 const path = require('path');
@@ -25,6 +26,5 @@ if (!fs.existsSync(firefoxDir)) {
   fs.mkdirSync(firefoxDir, { recursive: true });
 }
 
-const firefox = { ...m, background: { scripts: [sw] } };
-fs.writeFileSync(outPath, `${JSON.stringify(firefox, null, 2)}\n`);
+fs.writeFileSync(outPath, `${JSON.stringify(m, null, 2)}\n`);
 console.log('Wrote firefox/manifest.json');
