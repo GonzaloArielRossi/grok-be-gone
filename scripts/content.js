@@ -67,21 +67,32 @@ let grokTagDebounce = null;
 let pendingGrokTagRecords = [];
 
 function processGrokTagMutations(records) {
+  const articles = new Set();
   for (const record of records) {
+    // Check if the mutation target itself is inside an article (e.g. content
+    // being lazily populated inside an already-inserted tweet).
+    const targetArticle = record.target.closest('article[data-testid="tweet"]');
+    if (targetArticle) articles.add(targetArticle);
+
     for (const node of record.addedNodes) {
       if (node.nodeType !== Node.ELEMENT_NODE) continue;
-      const articles = new Set();
+      // The added node may itself be an article.
       if (node.matches?.('article[data-testid="tweet"]')) articles.add(node);
+      // The added node may be a descendant wrapper that contains articles.
       node
         .querySelectorAll('article[data-testid="tweet"]')
         .forEach((a) => articles.add(a));
-      for (const article of articles) {
-        if (articleMentionsGrok(article)) {
-          article.classList.add(GROK_TAG_CLASS);
-        } else if (article.classList.contains(GROK_TAG_CLASS)) {
-          article.classList.remove(GROK_TAG_CLASS);
-        }
-      }
+      // The added node may be a child of an already-inserted article.
+      const closestArticle = node.closest?.('article[data-testid="tweet"]');
+      if (closestArticle) articles.add(closestArticle);
+    }
+  }
+
+  for (const article of articles) {
+    if (articleMentionsGrok(article)) {
+      article.classList.add(GROK_TAG_CLASS);
+    } else if (article.classList.contains(GROK_TAG_CLASS)) {
+      article.classList.remove(GROK_TAG_CLASS);
     }
   }
 }
